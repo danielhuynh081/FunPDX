@@ -28,7 +28,9 @@ const Hero = () => {
             </span>
             <h1 className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tighter leading-tight">
               Discover Portland <br />
-              <span className="text-slate-300">Events.</span>
+              <span className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tighter leading-tight">
+                Events.
+              </span>
             </h1>
           </motion.div>
 

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const navLinks = [
@@ -20,21 +21,12 @@ const Navbar = () => {
         </motion.div>
 
         <ul className="flex items-center space-x-8">
-          {navLinks.map((link, i) => (
-            <motion.li
-              key={link.name}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <a
-                href={link.href}
-                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-              >
-                {link.name}
-              </a>
-            </motion.li>
-          ))}
+          <li className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+            <Link to="/">Home</Link>
+          </li>
+          <li className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+            <Link to="/events">Events</Link>
+          </li>
         </ul>
       </div>
     </nav>

@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./pages/Hero";
+import Events from "./pages/Events";
 
 const App = () => {
   useEffect(() => {
@@ -11,9 +13,10 @@ const App = () => {
   return (
     <div>
       <Navbar />
-      <main>
-        <Hero></Hero>
-      </main>
+      <Routes>
+        <Route path="/" element={<Hero />} />
+        <Route path="/events" element={<Events />} />
+      </Routes>
     </div>
   );
 };
