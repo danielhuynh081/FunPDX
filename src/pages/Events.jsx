@@ -1,6 +1,5 @@
-import React from "react";
 import { motion } from "framer-motion";
-
+import React, { useState } from "react";
 import portlandBg from "../assets/portlandbg.jpg";
 const events = [
   {
@@ -39,6 +38,11 @@ const events = [
 ];
 
 const Events = () => {
+  const [search, setSearch] = useState("");
+  const filteredEvents = events.filter((event) =>
+    event.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <section
       id="events"
@@ -50,7 +54,7 @@ const Events = () => {
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="EventPage container mx-auto px-6 relative z-10">
         <div className="max-w-8xl">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -67,11 +71,21 @@ const Events = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            className="w-full rounded-2xl bg-white/10 p-6 md:p-8 backdrop-blur-md border border-white/20"
+            className="EventPageContents relative w-full rounded-2xl bg-white/10 p-6 md:p-8 backdrop-blur-md border border-black/20"
           >
+            {/* Search bar */}
+            <div className="absolute right-6 top-4 w-full max-w-sm rounded-2xl bg-white border border-black/20">
+              <input
+                type="text"
+                placeholder="Search events..."
+                className="w-full px-4 py-2 rounded-lg bg-white/20 text-black placeholder-gray-300 focus:outline-none transition-colors"
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+              />
+            </div>
             {/* Grid Layout */}
-            <div className="grid grid-cols-3 gap-10 sm:grid-cols-2 md:grid-cols-3">
-              {events.map((event) => (
+            <div className="grid grid-cols-3 gap-10 sm:grid-cols-2 md:grid-cols-3 pt-11">
+              {filteredEvents.map((event) => (
                 <div
                   key={event.id}
                   className="rounded-xl mb-20 bg-zinc-100/90 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1"
