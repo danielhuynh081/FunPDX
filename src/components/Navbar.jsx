@@ -24,6 +24,9 @@ const Navbar = () => {
           <li className="text-md font-medium text-slate-300 hover:text-white transition-colors">
             <Link to="/events">Events</Link>
           </li>
+          <li className="text-md font-medium text-slate-300 hover:text-white transition-colors">
+            <Link to="/savedevents">Saved Events</Link>
+          </li>
         </ul>
       </div>
     </nav>

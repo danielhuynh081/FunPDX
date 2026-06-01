@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./pages/Hero";
 import Events from "./pages/Events";
+import SavedEvents from "./pages/SavedEvents";
 
 const App = () => {
   useEffect(() => {
@@ -16,6 +17,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Hero />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/savedevents" element={<SavedEvents />} />
       </Routes>
     </div>
   );
