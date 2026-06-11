@@ -1,199 +1,53 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FilterBar from "../components/FilterBar";
 import portlandBg from "../assets/portlandbg.jpg";
 import placeholderImage from "../assets/placeholder.png";
 
-const events = [
-  {
-    id: 1,
-    name: "Tech Conference 2026",
-    date: "June 15, 2026",
-    location: "Portland Convention Center",
-    description:
-      "A gathering of tech enthusiasts, startups, and industry leaders to discuss the latest trends in technology.",
-    image: null,
-    link: "https://www.techconference2026.com",
-    tags: ["Tech", "Conference", "Networking"],
-  },
-  {
-    id: 2,
-    name: "Portland Music Festival",
-    date: "July 10, 2026",
-    location: "Tom McCall Waterfront Park",
-    description:
-      "An outdoor music festival featuring local and national artists across multiple stages.",
-    image: null,
-    link: "https://www.portlandmusicfestival.com",
-    tags: ["Music", "Festival", "Outdoor"],
-  },
-  {
-    id: 3,
-    name: "Food Truck Rally",
-    date: "August 5, 2026",
-    location: "Portland State University",
-    description:
-      "A gathering of Portland's best food trucks offering a variety of cuisines.",
-    image: null,
-    link: "https://www.foodtruckrally.com",
-    tags: ["Food", "Truck", "Rally", "music"],
-  },
-  {
-    id: 1,
-    name: "Tech Conference 2026",
-    date: "June 15, 2026",
-    location: "Portland Convention Center",
-    description:
-      "A gathering of tech enthusiasts, startups, and industry leaders to discuss the latest trends in technology.",
-    image: null,
-    link: "https://www.techconference2026.com",
-    tags: ["Tech", "Conference", "Networking"],
-  },
-  {
-    id: 2,
-    name: "Portland Music Festival",
-    date: "July 10, 2026",
-    location: "Tom McCall Waterfront Park",
-    description:
-      "An outdoor music festival featuring local and national artists across multiple stages.",
-    image: null,
-    link: "https://www.portlandmusicfestival.com",
-    tags: ["Music", "Festival", "Outdoor"],
-  },
-  {
-    id: 3,
-    name: "Food Truck Rally",
-    date: "August 5, 2026",
-    location: "Portland State University",
-    description:
-      "A gathering of Portland's best food trucks offering a variety of cuisines.",
-    image: null,
-    link: "https://www.foodtruckrally.com",
-    tags: ["Food", "Truck", "Rally", "music"],
-  },
-  {
-    id: 1,
-    name: "Tech Conference 2026",
-    date: "June 15, 2026",
-    location: "Portland Convention Center",
-    description:
-      "A gathering of tech enthusiasts, startups, and industry leaders to discuss the latest trends in technology.",
-    image: null,
-    link: "https://www.techconference2026.com",
-    tags: ["Tech", "Conference", "Networking"],
-  },
-  {
-    id: 2,
-    name: "Portland Music Festival",
-    date: "July 10, 2026",
-    location: "Tom McCall Waterfront Park",
-    description:
-      "An outdoor music festival featuring local and national artists across multiple stages.",
-    image: null,
-    link: "https://www.portlandmusicfestival.com",
-    tags: ["Music", "Festival", "Outdoor"],
-  },
-  {
-    id: 3,
-    name: "Food Truck Rally",
-    date: "August 5, 2026",
-    location: "Portland State University",
-    description:
-      "A gathering of Portland's best food trucks offering a variety of cuisines.",
-    image: null,
-    link: "https://www.foodtruckrally.com",
-    tags: ["Food", "Truck", "Rally", "music"],
-  },
-  {
-    id: 1,
-    name: "Tech Conference 2026",
-    date: "June 15, 2026",
-    location: "Portland Convention Center",
-    description:
-      "A gathering of tech enthusiasts, startups, and industry leaders to discuss the latest trends in technology.",
-    image: null,
-    link: "https://www.techconference2026.com",
-    tags: ["Tech", "Conference", "Networking"],
-  },
-  {
-    id: 2,
-    name: "Portland Music Festival",
-    date: "July 10, 2026",
-    location: "Tom McCall Waterfront Park",
-    description:
-      "An outdoor music festival featuring local and national artists across multiple stages.",
-    image: null,
-    link: "https://www.portlandmusicfestival.com",
-    tags: ["Music", "Festival", "Outdoor"],
-  },
-  {
-    id: 3,
-    name: "Food Truck Rally",
-    date: "August 5, 2026",
-    location: "Portland State University",
-    description:
-      "A gathering of Portland's best food trucks offering a variety of cuisines.",
-    image: null,
-    link: "https://www.foodtruckrally.com",
-    tags: ["Food", "Truck", "Rally", "music"],
-  },
-  {
-    id: 1,
-    name: "Tech Conference 2026",
-    date: "June 15, 2026",
-    location: "Portland Convention Center",
-    description:
-      "A gathering of tech enthusiasts, startups, and industry leaders to discuss the latest trends in technology.",
-    image: null,
-    link: "https://www.techconference2026.com",
-    tags: ["Tech", "Conference", "Networking"],
-  },
-  {
-    id: 2,
-    name: "Portland Music Festival",
-    date: "July 10, 2026",
-    location: "Tom McCall Waterfront Park",
-    description:
-      "An outdoor music festival featuring local and national artists across multiple stages.",
-    image: null,
-    link: "https://www.portlandmusicfestival.com",
-    tags: ["Music", "Festival", "Outdoor"],
-  },
-  {
-    id: 3,
-    name: "Food Truck Rally",
-    date: "August 5, 2026",
-    location: "Portland State University",
-    description:
-      "A gathering of Portland's best food trucks offering a variety of cuisines.",
-    image: null,
-    link: "https://www.foodtruckrally.com",
-    tags: ["Food", "Truck", "Rally", "music"],
-  },
-];
-
 const ITEMS_PER_PAGE = 12;
 
 const Events = () => {
+  const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("http://localhost:3001/api/events");
+        if (!response.ok) throw new Error("Failed to fetch events");
+        const data = await response.json();
+        setEvents(data);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const categories = [
     "All",
     ...new Set(
-      events.flatMap((event) => event.tags.map((t) => t.toLowerCase()))
+      events.flatMap((event) => (event.tags || []).map((t) => t.toLowerCase()))
     ),
   ].map((cat) => cat.charAt(0).toUpperCase() + cat.slice(1));
 
   const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.name
+    const matchesSearch = (event.name || "")
       .toLowerCase()
       .includes(search.toLowerCase());
     const matchesCategory =
       activeCategory === "All" ||
-      event.tags.some((t) => t.toLowerCase() === activeCategory.toLowerCase());
+      (event.tags || []).some((t) => t.toLowerCase() === activeCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
@@ -305,49 +159,66 @@ const Events = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[600px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentPage + activeCategory + search}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="contents"
-                >
-                  {paginatedEvents.map((event, index) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ 
-                        duration: 0.3, 
-                        delay: index * 0.03,
-                        ease: "easeOut" 
-                      }}
-                      className="group cursor-pointer"
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      <div className="relative aspect-video overflow-hidden rounded-2xl mb-4">
-                        <img
-                          src={event.image || placeholderImage}
-                          alt={event.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                        <div className="absolute bottom-4 left-4">
-                          <span className="bg-accent text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                            {event.tags[0]}
-                          </span>
+              {isLoading ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-20">
+                  <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-slate-400 animate-pulse">Loading events...</p>
+                </div>
+              ) : error ? (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-red-400 text-lg mb-4">Oops! {error}</p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentPage + activeCategory + search}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="contents"
+                  >
+                    {paginatedEvents.map((event, index) => (
+                      <motion.div
+                        key={event._id || event.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                          duration: 0.3, 
+                          delay: index * 0.03,
+                          ease: "easeOut" 
+                        }}
+                        className="group cursor-pointer"
+                        onClick={() => setSelectedEvent(event)}
+                      >
+                        <div className="relative aspect-video overflow-hidden rounded-2xl mb-4">
+                          <img
+                            src={event.image || placeholderImage}
+                            alt={event.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div className="absolute bottom-4 left-4">
+                            <span className="bg-accent text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                              {(event.tags && event.tags[0]) || "Event"}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent transition-colors">
-                        {event.name}
-                      </h3>
-                      <p className="text-sm text-slate-400">{event.date}</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </AnimatePresence>
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent transition-colors">
+                          {event.name}
+                        </h3>
+                        <p className="text-sm text-slate-400">{event.date}</p>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+              )}
             </div>
 
             {paginatedEvents.length === 0 && (
