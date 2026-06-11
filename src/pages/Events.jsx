@@ -154,9 +154,7 @@ const Events = () => {
               </div>
             </div>
 
-            <div className="mb-4">
-              <Pagination />
-            </div>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[600px]">
               {isLoading ? (
