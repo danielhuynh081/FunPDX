@@ -52,7 +52,20 @@ const Hero = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex items-center space-x-8"
-          ></motion.div>
+          >
+            <a
+              href="/events"
+              className="px-8 py-4 bg-accent text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-accent/20"
+            >
+              Explore Events
+            </a>
+            <a
+              href="/savedevents"
+              className="px-8 py-4 bg-white/10 text-white font-bold rounded-2xl border border-white/20 hover:bg-white/20 transition-all backdrop-blur-md"
+            >
+              View Saved
+            </a>
+          </motion.div>
         </div>
       </div>
     </section>

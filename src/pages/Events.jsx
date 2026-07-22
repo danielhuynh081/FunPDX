@@ -14,6 +14,24 @@ const Events = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [savedEvents, setSavedEvents] = useState(() => {
+    const saved = localStorage.getItem("savedEvents");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
+  }, [savedEvents]);
+
+  const toggleSaveEvent = (e, event) => {
+    e.stopPropagation();
+    const isSaved = savedEvents.some((item) => item._id === event._id || item.id === event.id);
+    if (isSaved) {
+      setSavedEvents(savedEvents.filter((item) => (item._id || item.id) !== (event._id || event.id)));
+    } else {
+      setSavedEvents([...savedEvents, event]);
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -202,6 +220,35 @@ const Events = () => {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div className="absolute top-4 right-4">
+                            <button
+                              onClick={(e) => toggleSaveEvent(e, event)}
+                              className={`p-2 rounded-full backdrop-blur-md transition-all ${
+                                savedEvents.some((item) => (item._id || item.id) === (event._id || event.id))
+                                  ? "bg-accent text-white"
+                                  : "bg-black/20 text-white hover:bg-black/40"
+                              }`}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill={
+                                  savedEvents.some((item) => (item._id || item.id) === (event._id || event.id))
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                           <div className="absolute bottom-4 left-4">
                             <span className="bg-accent text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
                               {(event.tags && event.tags[0]) || "Event"}
@@ -296,10 +343,22 @@ const Events = () => {
                   href={selectedEvent.link}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-block w-full text-center py-4 bg-accent text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-accent/20"
+                  className="inline-block w-full text-center py-4 bg-accent text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-xl shadow-accent/20 mb-3"
                 >
                   Get Tickets / View Details
                 </a>
+                <button
+                  onClick={(e) => toggleSaveEvent(e, selectedEvent)}
+                  className={`w-full py-4 font-bold rounded-2xl transition-all border ${
+                    savedEvents.some((item) => (item._id || item.id) === (selectedEvent._id || selectedEvent.id))
+                      ? "bg-white/10 text-white border-white/20"
+                      : "bg-transparent text-white border-white/20 hover:bg-white/5"
+                  }`}
+                >
+                  {savedEvents.some((item) => (item._id || item.id) === (selectedEvent._id || selectedEvent.id))
+                    ? "❤️ Saved"
+                    : "🤍 Save Event"}
+                </button>
               </div>
             </motion.div>
           </div>
