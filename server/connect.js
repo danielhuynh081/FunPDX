@@ -23,6 +23,8 @@ export async function connectToDatabase() {
   try {
     await client.connect();
     db = client.db("livepdx");
+    // Verify connection by pinging the database
+    await db.command({ ping: 1 });
     console.log("Successfully connected to MongoDB");
     return db;
   } catch (e) {

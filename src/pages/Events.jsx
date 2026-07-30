@@ -1,16 +1,55 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import FilterBar from "../components/FilterBar";
+import AddEventModal from "../components/AddEventModal";
 import portlandBg from "../assets/portlandbg.jpg";
 import placeholderImage from "../assets/placeholder.png";
 
 const ITEMS_PER_PAGE = 12;
+
+const Pagination = ({ currentPage, totalPages, setCurrentPage }) =>
+  totalPages > 1 && (
+    <div className="flex justify-end items-center gap-4 py-6">
+      <button
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage((p) => p - 1)}
+        className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-sm"
+      >
+        Previous
+      </button>
+
+      <div className="flex gap-2">
+        {[...Array(totalPages)].map((_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`w-9 h-9 rounded-lg border transition-all text-sm ${
+              currentPage === i + 1
+                ? "bg-accent border-accent text-white shadow-lg shadow-accent/20"
+                : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+
+      <button
+        disabled={currentPage === totalPages}
+        onClick={() => setCurrentPage((p) => p + 1)}
+        className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-sm"
+      >
+        Next
+      </button>
+    </div>
+  );
 
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -88,42 +127,10 @@ const Events = () => {
     setCurrentPage(1);
   };
 
-  const Pagination = () =>
-    totalPages > 1 && (
-      <div className="flex justify-end items-center gap-4 py-6">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => p - 1)}
-          className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-sm"
-        >
-          Previous
-        </button>
+  const handleEventAdded = (newEvent) => {
+    setEvents((prev) => [newEvent, ...prev]);
+  };
 
-        <div className="flex gap-2">
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`w-9 h-9 rounded-lg border transition-all text-sm ${
-                currentPage === i + 1
-                  ? "bg-accent border-accent text-white shadow-lg shadow-accent/20"
-                  : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((p) => p + 1)}
-          className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-all text-sm"
-        >
-          Next
-        </button>
-      </div>
-    );
 
   return (
     <section
@@ -155,11 +162,24 @@ const Events = () => {
 
           <div className="mb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
-              <FilterBar
-                categories={categories}
-                activeCategory={activeCategory}
-                onSelectCategory={handleCategoryChange}
-              />
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <FilterBar
+                  categories={categories}
+                  activeCategory={activeCategory}
+                  onSelectCategory={handleCategoryChange}
+                />
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="group flex items-center justify-center gap-2 px-6 py-2 rounded-full bg-accent text-white font-semibold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-accent/25 h-[42px] border border-white/10"
+                >
+                  <div className="bg-white/20 p-1 rounded-full group-hover:rotate-90 transition-transform duration-300">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                  Add Event
+                </button>
+              </div>
 
               <div className="relative w-full max-w-md">
                 <input
@@ -172,7 +192,11 @@ const Events = () => {
               </div>
             </div>
 
-
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              setCurrentPage={setCurrentPage} 
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[600px]">
               {isLoading ? (
@@ -278,6 +302,11 @@ const Events = () => {
               </motion.div>
             )}
           </div>
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            setCurrentPage={setCurrentPage} 
+          />
         </div>
       </div>
 
@@ -316,7 +345,7 @@ const Events = () => {
 
               <div className="p-8 md:p-12 -mt-20 relative z-10">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {selectedEvent.tags.map((tag) => (
+                  {(selectedEvent.tags || []).map((tag) => (
                     <span
                       key={tag}
                       className="bg-accent/10 text-accent text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full"
@@ -364,6 +393,13 @@ const Events = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <AddEventModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onEventAdded={handleEventAdded}
+        categories={categories}
+      />
     </section>
   );
 };
