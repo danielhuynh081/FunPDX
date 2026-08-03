@@ -1,5 +1,6 @@
 import express from "express";
 import { connectToDatabase } from "../connect.js";
+import { ObjectId } from "mongodb";
 
 const router = express.Router();
 
@@ -13,6 +14,8 @@ function validateEvent(event) {
     "description",
     "price",
     "tags",
+    "type",
+    "organizer",
   ];
 
   const missingFields = requiredFields.filter((field) => !event[field]);
@@ -77,6 +80,24 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Delete an event
+router.delete("/:id", async (req, res) => {
+  try {
+    const db = await connectToDatabase();
+    const result = await db.collection("events").deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    res.json({ message: "Event deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete event" });
+  }
+});
 
 // Get submitted events awaiting approval
 router.get("/submissions", async (req, res) => {
