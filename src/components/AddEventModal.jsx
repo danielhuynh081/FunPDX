@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const FIELD_ICONS = {
   name: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>,
@@ -8,7 +9,9 @@ const FIELD_ICONS = {
   location: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
   price: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16v1m0-24v1" /></svg>,
   tags: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
-  image: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+  image: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+  type: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
+  organizer: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
 };
 
 const TimeWheel = React.memo(({ label, value, onChange }) => {
@@ -163,7 +166,8 @@ const InputField = React.memo(({ label, name, value, onChange, onBlur, type = "t
   );
 });
 
-const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
+const AddEventModal = ({ isOpen, onClose, categories = [], eventToEdit = null }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     date: "",
@@ -173,12 +177,46 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
     description: "",
     category: "",
     otherCategory: "",
-    price: ""
+    price: "",
+    type: "",
+    otherType: "",
+    organizer: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showOtherCategory, setShowOtherCategory] = useState(false);
+  const [showOtherType, setShowOtherType] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: "" });
   const modalRef = useRef(null);
+
+  const eventTypes = ["Concert", "Festival", "Workshop", "Conference", "Market", "Art Show", "Sports", "Networking", "Community"];
+
+  // Initialize form with eventToEdit data if provided
+  useEffect(() => {
+    if (eventToEdit) {
+      const [startTime, endTime] = (eventToEdit.time || "").split(" - ");
+      
+      // Determine if category/type is "Other"
+      const isOtherCat = eventToEdit.tags && eventToEdit.tags[0] && !categories.includes(eventToEdit.tags[0]);
+      const isOtherTyp = eventToEdit.type && !eventTypes.includes(eventToEdit.type);
+
+      setFormData({
+        name: eventToEdit.name || "",
+        date: eventToEdit.date || "",
+        startTime: startTime || "",
+        endTime: endTime || "",
+        location: eventToEdit.location || "",
+        description: eventToEdit.description || "",
+        category: isOtherCat ? "Other" : (eventToEdit.tags ? eventToEdit.tags[0] : ""),
+        otherCategory: isOtherCat ? eventToEdit.tags[0] : "",
+        price: eventToEdit.price || "",
+        type: isOtherTyp ? "Other" : (eventToEdit.type || ""),
+        otherType: isOtherTyp ? eventToEdit.type : "",
+        organizer: eventToEdit.organizer || ""
+      });
+      setShowOtherCategory(isOtherCat);
+      setShowOtherType(isOtherTyp);
+    }
+  }, [eventToEdit, categories]);
 
   // Close on outside click
   useEffect(() => {
@@ -218,9 +256,13 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
         description: "",
         category: "",
         otherCategory: "",
-        price: ""
+        price: "",
+        type: "",
+        otherType: "",
+        organizer: ""
       });
       setShowOtherCategory(false);
+      setShowOtherType(false);
       setAlert({ show: false, message: "" });
     };
 
@@ -240,6 +282,14 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
         setShowOtherCategory(true);
       } else {
         setShowOtherCategory(false);
+      }
+    }
+
+    if (name === "type") {
+      if (value === "Other") {
+        setShowOtherType(true);
+      } else {
+        setShowOtherType(false);
       }
     }
 
@@ -293,9 +343,14 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
     }
     
     // Validation
-    const requiredFields = ['name', 'date', 'startTime', 'endTime', 'location', 'description', 'price', 'category'];
+    const requiredFields = ['name', 'date', 'startTime', 'endTime', 'location', 'description', 'price', 'category', 'type', 'organizer'];
     if (showOtherCategory && !formData.otherCategory) {
       setAlert({ show: true, message: "Please specify the other category." });
+      return;
+    }
+
+    if (showOtherType && !formData.otherType) {
+      setAlert({ show: true, message: "Please specify the other event type." });
       return;
     }
 
@@ -307,14 +362,41 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
     }
 
     setIsSubmitting(true);
+
+    // Duplicate Detection (only for new submissions)
+    if (!eventToEdit) {
+      try {
+        const dupResponse = await fetch("http://localhost:3001/api/events/check-duplicate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            date: formData.date,
+            location: formData.location
+          }),
+        });
+        const dupData = await dupResponse.json();
+        if (dupData.duplicate) {
+          setAlert({ show: true, message: "A similar event already exists or is pending approval." });
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (err) {
+        console.error("Duplicate check failed:", err);
+      }
+    }
     
     const finalCategory = showOtherCategory ? formData.otherCategory : formData.category;
+    const finalType = showOtherType ? formData.otherType : formData.type;
     const tagsArray = [finalCategory];
       
     const eventToSubmit = {
       ...formData,
+      type: finalType,
       time: `${formData.startTime} - ${formData.endTime}`,
       tags: tagsArray,
+      createdBy: eventToEdit ? eventToEdit.createdBy : (user?.username || 'anonymous'),
+      requester: user,
     };
 
     // Clean up internal state fields not needed by API
@@ -322,30 +404,35 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
     delete eventToSubmit.endTime;
     delete eventToSubmit.category;
     delete eventToSubmit.otherCategory;
+    delete eventToSubmit.otherType;
 
     try {
-      const response = await fetch("http://localhost:3001/api/events", {
-        method: "POST",
+      const url = eventToEdit 
+        ? `http://localhost:3001/api/events/${eventToEdit._id}`
+        : "http://localhost:3001/api/events/submissions";
+      
+      const response = await fetch(url, {
+        method: eventToEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventToSubmit),
       });
+      const resultData = await response.json();
 
-      if (response.ok) {
-        const newEvent = await response.json();
-        onEventAdded(newEvent);
-        onClose();
-      } else {
-        setAlert({ show: true, message: "Failed to add event. Please try again." });
+      if (!response.ok) {
+        setAlert({ show: true, message: `Failed to ${eventToEdit ? 'update' : 'submit'} event. Please try again.` });
+        return;
       }
+
+      onClose();
     } catch (error) {
-      console.error("Error adding event:", error);
+      console.error("Error adding/updating event:", error);
       setAlert({ show: true, message: "Error connecting to server." });
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, showOtherCategory, onEventAdded, onClose]);
+  }, [formData, showOtherCategory, onClose, eventToEdit, user]);
 
 
   return (
@@ -521,6 +608,59 @@ const AddEventModal = ({ isOpen, onClose, onEventAdded, categories = [] }) => {
                       icon={FIELD_ICONS.tags}
                     />
                   )}
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
+                      Event Type <span className="text-accent">*</span>
+                    </label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-accent transition-colors">
+                        {FIELD_ICONS.type}
+                      </div>
+                      <select
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                        required
+                        className="w-full bg-slate-800/50 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all text-sm appearance-none"
+                      >
+                        <option value="" disabled className="bg-slate-900">Select Type</option>
+                        {eventTypes.map(type => (
+                          <option key={type} value={type} className="bg-slate-900">{type}</option>
+                        ))}
+                        <option value="Other" className="bg-slate-900">Other</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {showOtherType && (
+                    <InputField 
+                      key="input-other-type"
+                      label="Specify Type" 
+                      name="otherType" 
+                      value={formData.otherType}
+                      onChange={handleChange}
+                      placeholder="e.g. Workshop" 
+                      required
+                      icon={FIELD_ICONS.type}
+                    />
+                  )}
+
+                  <InputField 
+                    key="input-organizer"
+                    label="Organized By" 
+                    name="organizer" 
+                    value={formData.organizer}
+                    onChange={handleChange}
+                    placeholder="e.g. Portland Arts Council" 
+                    required
+                    icon={FIELD_ICONS.organizer}
+                  />
 
                   <div className="md:col-span-2 space-y-1.5">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">
